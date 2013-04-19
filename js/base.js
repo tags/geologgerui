@@ -20,7 +20,9 @@ var Base = function() {
 		if ( typeof _observers[n] === 'undefined' ) {
 			_observers[n] = [];
 		}
-		_observers[n].push(f);
+		if (_observers[n].indexOf(f) == -1) {
+			_observers[n].push(f);
+		}
 	}
 
 	this.get = function(n) {
