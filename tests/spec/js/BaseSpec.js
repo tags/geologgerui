@@ -89,7 +89,7 @@ describe("Base", function() {
 	describe("::extend()", function() {
 		it("should create a new Base object", function() {
 			var base = Base.extend();
-			expect(base instanceof Base).toBeTruthy;
+			expect(base instanceof Base).toBe(true);
 		});
 		it("should extend base with the values in an object", function() {
 			var obj = {foo: 42, bar: 'dont worry'};
