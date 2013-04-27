@@ -27,7 +27,42 @@ describe("Twilights", function() {
 		});
 		it("should be set to the correct dates for an integer value", function() {
 			app.set('threshold',5);
-			expect(app.get('events')[0].get('datetime').getTime()).toBeWithinOneSecondOf(twilightEventsAt5()[0].getTime());
+			var expected = twilightEventsAt5();
+			var twilights = app.get('events');
+			expect(twilights.length).toEqual(expected.length);
+			for (var i = 0; i < expected.length; i++) {
+				expect(twilights[i].get('datetime').getTime()).toBeWithinOneSecondOf(expected[i].getTime());
+			}
+		});
+		it("should be set to the correct dates for a real value", function() {
+			app.set('threshold',5.5);
+			var expected = twilightEventsAt5Point5();
+			var twilights = app.get('events');
+			expect(twilights.length).toEqual(expected.length);
+			for (var i = 0; i < expected.length; i++) {
+				expect(twilights[i].get('datetime').getTime()).toBeWithinOneSecondOf(expected[i].getTime());
+			}
+		});
+		it("should be a sunrise when the light value is rising", function() {
+			app.set('threshold',5);
+			var twilights = app.get('events');
+			for (var i = 0; i < twilights.length; i++) {
+				if (i%2==0) {
+					expect(twilights[i].get("type")).toEqual("sunrise");
+				}
+			}
+		});
+		it("should be a sunset when the light value is falling", function() {
+			app.set('threshold',5);
+			var twilights = app.get('events');
+			for (var i = 0; i < twilights.length; i++) {
+				if (i%2==1) {
+					expect(twilights[i].get("type")).toEqual("sunset");
+				}
+			}
+		});
+		it("should be a ??? when the light values are the same", function() {
+			//pending();
 		});
 	});
 });

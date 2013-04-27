@@ -18,6 +18,7 @@
 	<script src="lib/Blob.js" type="text/javascript"></script>
 	<script src="lib/FileSaver.min.js" type="text/javascript"></script>
 
+	<script src="js/cybercommons.js" type="text/javascript"></script>
 	<script src="js/utilities.js" type="text/javascript"></script>
 	<script src="js/base.js" type="text/javascript"></script>
 	<script src="js/log.js"></script>
@@ -306,6 +307,7 @@
 <script type="text/javascript" src="app/calibration.js"></script>
 <script type="text/javascript" src="app/twilights.js"></script>
 <script type="text/javascript" src="app/map.js"></script>
+<script type="text/javascript" src="app/process.js"></script>
 
 <script>
 
@@ -489,52 +491,10 @@
 	  	}
 		});
 	  
-		// processing
-		// ToDo: Remove dummy tag name
-		// ToDo: Check for remaining problems
-
-		function pollStatus(args) {
-	    $.getJSON(args.host + args.task_id + '?callback=?')
-        .fail(function(jqXHR, status) {
-        	args.onFailure(jqXHR, status);
-        })
-        .done(function(data) {
-	        if (data.status == "PENDING") {
-	          args.onPending(args.task_id);
-	        } else if (data.status == "FAILURE") {
-	          args.onFailure(data);
-	        } else if (data.status == "SUCCESS") {
-	          args.onSuccess(data);
-	        }
-	      });
-		}
-
-		function getStatus(taskID) {
-			log("fetching status",taskID);
-			var promise = new $.Deferred();
-			var timer;
-			var args = {
-				host: 'http://test.cybercommons.org/queue/task/',
-				task_id: taskID,
-				onFailure: function(data) {
-					clearInterval(timer);
-					promise.reject(undefined,data);
-				},
-				onSuccess: function(data) {
-					clearInterval(timer);
-					promise.resolve(data);
-				},
-				onPending: function() {
-					; // nothing
-				}
-			}
-			timer = setInterval(function () {
-				pollStatus(args);
-			}, 2000);
-			return promise;
-		}
-
 		$('#compute-sun-angle').click(function() {
+			app.process.sunAngle();
+			return false;
+
 			if (!validateForSunAngle()) return false;
 
 			var $indicator = $('#sun-angle-indicator');
@@ -563,7 +523,9 @@
 						stopProgressIndicator($indicator);
 						return;
 					}
-					getStatus(data.task_id)
+
+					var cb = new CyberCommons();
+					cb.getStatusOfTask(data.task_id)
 						.always(function() {
 							stopProgressIndicator($indicator);
 						})
@@ -617,7 +579,8 @@
 					log("post completed",data);
 					$text.text('Data are being processed');
 					
-					getStatus(data.task_id)
+					var cb = new CyberCommons();
+					cb.getStatusOfTask(data.task_id)
 						.always(function() {
 							stopProgressIndicator($indicator);
 							$btn.removeClass('btn-primary');
@@ -782,6 +745,7 @@
 		// All browsers respect definition order with the exception of Chrome and 
 		// Opera which do for every non-numerical property name.
 		// Really need to test this output
+
 
 		$('#export-csv').click(function(d) {
 			exportAsCSV(tildeData());
