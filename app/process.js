@@ -6,16 +6,16 @@ var app = app || Base.extend();
 			sunAngle: function() {
 				if (!this.validateForSunAngle()) return false;
 
-				var $indicator = $('#sun-angle-indicator');
 				var me = this;
+				var $indicator = $('#sun-angle-indicator');
 
 				var url = "http://test.cybercommons.org/queue/run/geologger.getElevation@geologger";
-				var data = this.formattedEventData(app.get('events'),app.get('calibrationPeriod'));
+				var twilights = this.formattedEventData(app.get('events'),app.get('calibrationPeriod'));
 				var postdata = {
 					release_location: app.get('releaseLocation'),
 					threshold: app.get('threshold'),
 					tagname: app.get('tagname'),
-					twilights: data
+					twilights: twilights
 				}
 				
 				log(postdata);
@@ -51,6 +51,107 @@ var app = app || Base.extend();
 					});
 				},
 
+			locations: function() {
+				if (!this.validateForProcessing()) return false;
+
+				var me = this;
+				var $indicator = $('#submit-for-processing i');
+				var $text = $('#submit-for-processing .text');
+				var $btn = $('#submit-for-processing');
+			
+				var url = 'http://test.cybercommons.org/queue/run/geologger.coord@geologger';
+				var twilights = this.formattedEventData(app.get('events'));
+				var postdata = {
+					threshold: +app.get('threshold'),
+					tagname: app.get('tagname'),
+					twilights: twilights,
+					calibperiod: app.get('calibrationPeriod'),
+					sunelevation: app.get('sunangle'),
+					computed: app.get('angleComputed'),
+					release_location: app.get('releaseLocation')
+				};
+
+				this.startProgressIndicator($indicator);
+				$.post(url,{data: JSON.stringify(postdata)}, null, "json")
+					.fail(function(jqXHR, status) {
+						log("post failed", status);
+						$text.text('Error! Try again in a few seconds');
+						$btn.addClass('btn-danger');
+						setTimeout(function() {
+							$text.text("Submit for processing");
+							$btn.removeClass('btn-danger');
+							$btn.addClass('btn-primary');
+						},8000);
+					})
+					.done(function(data) {
+						log("post completed",data);
+						$text.text('Data are being processed');
+						
+						var cb = new CyberCommons();
+						cb.getStatusOfTask(data.task_id)
+							.always(function() {
+								me.stopProgressIndicator($indicator);
+								$btn.removeClass('btn-primary');
+							})
+							.fail(function(jqXHR, status) {
+								log("failed to retrieve task status",status);
+								$text.text('Error! Try again in a few seconds');
+								$btn.addClass('btn-danger');
+								setTimeout(function() {
+									$text.text("Submit for processing");
+									$btn.removeClass('btn-danger');
+									$btn.addClass('btn-primary');
+								},8000);
+							})
+							.done(function(data) {
+								log("status completed, grabbing geojson");
+								$text.text('Success! Loading map data');
+								$btn.addClass('btn-info');
+
+								$('#app-tabs a[href="#map-tab"]').tab('show');
+								me.getGeoJSON();
+
+								setTimeout(function() {
+									$text.text("Submit for processing");
+									$btn.removeClass('btn-info');
+									$btn.addClass('btn-primary');
+								},8000);
+							});
+					});
+			},
+
+			getGeoJSON: function() {
+
+				var me = this;
+				var url = 'http://test.cybercommons.org/mongo/db_find/geologger/coord/';
+				var props = {
+					spec: {
+						"properties.tagname": app.get('tagname'),
+						"properties.user_id": "guest"
+					},
+					sort: [["properties.timestamp",-1]],
+					limit: 1
+				}
+
+				url += JSON.stringify(props);
+
+				$.getJSON(url)
+					.fail(function(jqXHR, status) {
+		        log("geojson get failed", status);
+	        })
+	        .done(function(data) {
+	        	log("post completed",data);
+	        	app.map.drawGeoJSON(data[0].features);
+	        	me.updateCoordinates(data[0].features);
+	        });
+			},
+
+			updateCoordinates: function(features) {
+				app.set('birdLocations', _.map(features, function(d) {
+					return d.geometry.coordinates;
+				}));
+			},
+
 			validateForSunAngle: function() {
 				this.hideAllLabelTooltips();
 				if (!this.lightThresholdIsValid(app.get('threshold'))) {
@@ -63,6 +164,23 @@ var app = app || Base.extend();
 				}
 				if (!this.calibrationPeriodIsValid(app.get('calibrationPeriod'))) {
 					this.showTooltipForLabel('cal-start-date'); 
+					return false;
+				}
+				return true;
+			},
+
+			validateForProcessing: function() {
+				this.hideAllLabelTooltips();
+				if (!this.lightThresholdIsValid(app.get('threshold'))) {
+					this.showTooltipForLabel('threshold');
+					return false;
+				}
+				if (!this.releaseLocationIsValid(app.get('releaseLocation'))) {
+					this.showTooltipForLabel('latitude');
+					return false;
+				}
+				if (!this.sunAngleIsValid(app.get('sunangle'))) {
+					this.showTooltipForLabel('sun-angle');
 					return false;
 				}
 				return true;
@@ -88,6 +206,11 @@ var app = app || Base.extend();
 				} else {
 					return true;
 				}
+			},
+
+			sunAngleIsValid: function(angle) {
+				if (!angle) return false;
+				return true;
 			},
 
 			formattedEventData: function(data,range) {

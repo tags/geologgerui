@@ -308,6 +308,7 @@
 <script type="text/javascript" src="app/twilights.js"></script>
 <script type="text/javascript" src="app/map.js"></script>
 <script type="text/javascript" src="app/process.js"></script>
+<script type="text/javascript" src="app/exporter.js"></script>
 
 <script>
 
@@ -485,451 +486,40 @@
 		// point updating ~ cannot draw all points simultaneously
 		// and datagroup updating ~ optimize
 
-		app.addObserver('extent', function() {
+		app.addObserver('extent', function() { // should be in charting?
 	  	if ( app.chart.pointsVisible() ) {
 	  		app.chart.redrawPoints();
 	  	}
 		});
 	  
+		// processing
+
 		$('#compute-sun-angle').click(function() {
 			app.process.sunAngle();
-			return false;
-
-			if (!validateForSunAngle()) return false;
-
-			var $indicator = $('#sun-angle-indicator');
-
-			var url = "http://test.cybercommons.org/queue/run/geologger.getElevation@geologger";
-			var data = formattedEventData(app.get('events'),app.get('calibrationPeriod'));
-			var postdata = {
-				release_location: app.get('releaseLocation'),
-				threshold: app.get('threshold'),
-				tagname: app.get('tagname'),
-				twilights: data
-			}
-			
-			log(postdata);
-			
-			startProgressIndicator($indicator);
-			$.post(url,{data: JSON.stringify(postdata)}, null, "json")
-				.fail(function(jqXHR, status) {
-					log("post failed", status);
-					stopProgressIndicator($indicator);
-				})
-				.done(function(data) {
-					log("post completed",data, typeof data);
-					if (!data.task_id) {
-						log("no task id returned");
-						stopProgressIndicator($indicator);
-						return;
-					}
-
-					var cb = new CyberCommons();
-					cb.getStatusOfTask(data.task_id)
-						.always(function() {
-							stopProgressIndicator($indicator);
-						})
-						.fail(function(jqXHR, status) {
-							log("failed to retrieve task status",status);
-						})
-						.done(function(data) {
-							var angle = data.tombstone[0].result.sunelevation;
-							log("task status resolved", angle, data);
-							app.set('angleComputed',true);
-							app.set('sunangle',angle);
-						});
-				});
-
 			return false;
 		});
 
 		$('#submit-for-processing').click(function() {
-			if (!validateForProcessing()) return false;
-
-			var $indicator = $('#submit-for-processing i');
-			var $text = $('#submit-for-processing .text');
-			var $btn = $(this);
-		
-			var url = 'http://test.cybercommons.org/queue/run/geologger.coord@geologger';
-		
-			var data = formattedEventData(app.get('events'));
-			var postdata = {
-				threshold: +app.get('threshold'),
-				tagname: app.get('tagname'),
-				twilights: data,
-				calibperiod: app.get('calibrationPeriod'),
-				sunelevation: app.get('sunangle'),
-				computed: app.get('angleComputed'),
-				release_location: app.get('releaseLocation')
-			};
-
-			startProgressIndicator($indicator);
-			$.post(url,{data: JSON.stringify(postdata)}, null, "json")
-				.fail(function(jqXHR, status) {
-					log("post failed", status);
-					$text.text('Error! Try again in a few seconds');
-					$btn.addClass('btn-danger');
-					setTimeout(function() {
-						$text.text("Submit for processing");
-						$btn.removeClass('btn-danger');
-						$btn.addClass('btn-primary');
-					},8000);
-				})
-				.done(function(data) {
-					log("post completed",data);
-					$text.text('Data are being processed');
-					
-					var cb = new CyberCommons();
-					cb.getStatusOfTask(data.task_id)
-						.always(function() {
-							stopProgressIndicator($indicator);
-							$btn.removeClass('btn-primary');
-						})
-						.fail(function(jqXHR, status) {
-							log("failed to retrieve task status",status);
-							$text.text('Error! Try again in a few seconds');
-							$btn.addClass('btn-danger');
-							setTimeout(function() {
-								$text.text("Submit for processing");
-								$btn.removeClass('btn-danger');
-								$btn.addClass('btn-primary');
-							},8000);
-						})
-						.done(function(data) {
-							log("status completed, grabbing geojson");
-							$text.text('Success! Loading map data');
-							$btn.addClass('btn-info');
-
-							$('#app-tabs a[href="#map-tab"]').tab('show');
-							getGeoJSON();
-
-							setTimeout(function() {
-								$text.text("Submit for processing");
-								$btn.removeClass('btn-info');
-								$btn.addClass('btn-primary');
-							},8000);
-						});
-				});
-		
+			app.process.locations();
 			return false;
 		});
 
-		function getGeoJSON() {
-
-			var url = 'http://test.cybercommons.org/mongo/db_find/geologger/coord/';
-			var props = {
-				spec: {
-					"properties.tagname": app.get('tagname'),
-					"properties.user_id": "guest"
-				},
-				sort: [["properties.timestamp",-1]],
-				limit: 1
-			}
-
-			url += JSON.stringify(props);
-
-			$.getJSON(url)
-				.fail(function(jqXHR, status) {
-	        log("geojson get failed", status);
-        })
-        .done(function(data) {
-        	log("post completed",data);
-        	app.map.drawGeoJSON(data[0].features);
-        	updateCoordinates(data[0].features);
-        });
-		}
-
-		function updateCoordinates(features) {
-			app.set('birdLocations', _.map(features, function(d) {
-				return d.geometry.coordinates;
-			}));
-		}
-
-		function formattedEventData(data,range) {
-			// convert datetime fields to tFirst and tSecond for R processing
-			var fdata = _.map(data, function(d) { return d.toObject(); });
-			if (range) fdata = _.filter(fdata, function(d) {
-				return d.datetime >= range[0] && d.datetime <= range[1];
-			});
-
-			for (var i = 0; i < fdata.length-1; i++) {
-				fdata[i].tFirst = fdata[i].datetime;
-				fdata[i].tSecond = fdata[i+1].datetime;
-				delete fdata[i].datetime;
-				delete fdata[i].threshold;
-				delete fdata[i].problem;
-			}
-			return fdata.slice(0,-1);
-		}
-
-		function startProgressIndicator($indicator) {
-			$indicator.show();
-		}
-
-		function stopProgressIndicator($indicator) {
-			$indicator.hide();
-		}
-
-		// data validation prior to posting
-
-		function validateForSunAngle() {
-			hideAllLabelTooltips();
-			if (!lightThresholdIsValid(app.get('threshold'))) {
-				showTooltipForLabel('threshold'); 
-				return false;
-			}
-			if (!releaseLocationIsValid(app.get('releaseLocation'))) {
-				showTooltipForLabel('latitude'); 
-				return false;
-			}
-			if (!calibrationPeriodIsValid(app.get('calibrationPeriod'))) {
-				showTooltipForLabel('cal-start-date'); 
-				return false;
-			}
-			return true;
-		}
-
-		function validateForProcessing() {
-			hideAllLabelTooltips();
-			if (!lightThresholdIsValid(app.get('threshold'))) {
-				showTooltipForLabel('threshold');
-				return false;
-			}
-			if (!releaseLocationIsValid(app.get('releaseLocation'))) {
-				showTooltipForLabel('latitude');
-				return false;
-			}
-			if (!sunAngleIsValid(app.get('sunangle'))) {
-				showTooltipForLabel('sun-angle');
-				return false;
-			}
-			return true;
-		}
-
-		function hideAllLabelTooltips() {
-			$('label[data-error=tooltip]').tooltip('destroy');
-		}
-
-		function showTooltipForLabel(name) {
-			$('[for='+name+']').tooltip('show');
-		}
-
-		function lightThresholdIsValid(threshold) {
-			if (!threshold) return false;
-			return true;
-		}
-
-		function releaseLocationIsValid(location) {
-			if (!location.length==2 || !location[0] || !location[1]) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-
-		function calibrationPeriodIsValid(period) {
-			if (!period.length==2 || !period[0] || !period[1] || 
-					 period[0] >= period[1]) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-
-		function sunAngleIsValid(angle) {
-			if (!angle) return false;
-			return true;
-		}
-
-		// http://stackoverflow.com/questions/280713/elements-order-in-a-for-in-loop
-		// All browsers respect definition order with the exception of Chrome and 
-		// Opera which do for every non-numerical property name.
-		// Really need to test this output
-
+		// exporting / downloads
 
 		$('#export-csv').click(function(d) {
-			exportAsCSV(tildeData());
+			app.exporter.exportCsv(app.exporter.tildeData());
 			return false;
 		});
 
 		$('#export-json').click(function(d) {
-			exportAsJSON(tildeData());
+			app.exporter.exportJson(app.exporter.tildeData());
 			return false;
 		});
 
 		$('#export-map').click(function(d) {
-			exportMapAsCSV(_.clone(app.get('birdLocations')));
+			app.exporter.exportMapCsv(_.clone(app.get('birdLocations')));
 			return false;
 		});
-
-		function tildeData() {
-			var data = _.map(app.get('data'), function(d) {
-				return _.clone(d); // js references are problematic
-			});
-
-			// add required csv fields to existing light data
-
-			_.each(data, function(d) {
-				d.twilight = 0;
-				d.interp = "FALSE";
-				d.excluded = "FALSE";
-			});
-
-			// format twilight events
-
-			var events = _.map(app.get('events'), function(e) {
-				var t = e.toObject();
-				var type = 0;
-				if (t.type == "sunrise") type = 1;
-				else if (t.type == "sunset") type = 2;
-				var r = {};
-
-					r.datetime = t.datetime;
-					r.light = t.threshold;
-					r.twilight = type;
-					r.interp = "TRUE";
-					r.excluded = (t.active?"FALSE":"TRUE");
-
-				return r;
-			});
-			
-			// add twilight events to light data and sort
-
-			data = data.concat(events);
-			data = _.sortBy(data, function(d) {
-				return d.datetime;
-			});
-
-			// filter out light data that has been duplicated by twilight events
-			// and set interp to false for the twilight event
-
-			var dataOut = [];
-			for (var i = 0; i < data.length-1; i++) {
-				if (data[i].datetime.getTime() != data[i+1].datetime.getTime()) {
-					dataOut.push(data[i]);
-				} else {
-					// ensure the duplication is a light-twilight dup 
-					// and not a light-light
-					if (data[i+1].twilight != 0) {
-						data[i+1].interp = "FALSE";
-					}
-				}
-			}
-
-			return dataOut;
-		}
-
-		function exportAsCSV(dataOut) {
-			
-			// one more pass converting date values to iso
-
-			_.each(dataOut, function(d) {
-				d.datetime = d.datetime.toISOString();
-			});
-
-			// add csv fields
-			dataOut.unshift({
-				datetime: 'datetime', 
-				light: 'light',
-				twilight: 'twilight',
-				interp: 'interp',
-				excluded: 'excluded'
-			});
-
-			var csv = arrayOfObjectsToCSV(dataOut);
-			saveAs(
-	      new Blob([csv], {
-	      	type: "text/csv;charset=" + document.characterSet
-	      }), app.get('tagname')+".csv"
-	    );
-			
-			//var uriContent = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
-			//var myWindow = window.open(uriContent, "Tilde CSV");
-		}
-
-		function exportAsJSON(dataOut) {
-
-			// R serializes table data rather strangely, but economically
-			
-			var tilde = {
-				datetime: [],
-				light: [],
-				twilight: [],
-				interp: [],
-				excluded: []
-			}
-
-			_.each(dataOut, function(d) {
-				tilde.datetime.push(d.datetime);
-				tilde.light.push(d.light);
-				tilde.twilight.push(d.twilight);
-				tilde.interp.push(d.interp);
-				tilde.excluded.push(d.excluded);
-			});
-
-			// and we have metadata
-
-			var allOut = {
-				tilde: tilde,
-				latlngs: app.get('birdLocations'),
-				metadata: {
-					tagname: app.get('tagname'),
-					tagid: app.get('tagname'),
-					solar_elevation: app.get('sunangle'),
-					calibration: [
-						{
-							location: app.get('releaseLocation'),
-							start_time: app.get('calibrationPeriod')[0],
-							stop_time: app.get('calibrationPeriod')[1]
-						}
-					],
-					release_location: app.get('releaseLocation'),
-					release_time: "NA",
-					recapture_location: "NA",
-					recapture_time: "NA",
-					notes: app.get('notes'),
-					species: "NA"
-				}
-			}
-
-			var json = JSON.stringify(allOut, null, "  ");
-			saveAs(
-	      new Blob([json], {
-	      	type: "application/json;charset=" + document.characterSet
-	      }), app.get('tagname')+".json"
-	    );
-		}
-
-		function exportMapAsCSV(dataOut) {
-			dataOut.unshift(['lat', 'lng']);
-			var csv = arrayOfArraysToCSV(dataOut);
-			saveAs(
-	      new Blob([csv], {
-	      	type: "text/csv;charset=" + document.characterSet
-	      }), app.get('tagname')+"_latlng.csv"
-	    );
-		}
-
-		function arrayOfObjectsToCSV(array) {
-			var keys = _.keys(array[0]);
-			var csv = '';
-			_.each(array, function(d) {
-				csv += _.map(keys,function(k) {
-					return d[k];
-				}).join(',');
-				csv += '\r\n';
-			});
-			return csv;
-		}
-
-		function arrayOfArraysToCSV(array) {
-			var csv = '';
-			_.each(array, function(d) {
-				csv += d.join(',');
-				csv += '\r\n';
-			});
-			return csv;
-		}
 
 		// clear error on input label once editing begins
 		
