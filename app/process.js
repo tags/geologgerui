@@ -4,64 +4,77 @@ var app = app || Base.extend();
 	app.process = Base.extend((function() {
 		return {
 			sunAngle: function() {
-				if (!this.validateForSunAngle()) return false;
+				if (!this.validateForSunAngle()) 
+					return false;
 
-				var me = this;
 				var $indicator = $('#sun-angle-indicator');
+				var me = this;
 
 				var url = "http://test.cybercommons.org/queue/run/geologger.getElevation@geologger";
+				var postdata = this.sunAngleData();
+				
+				this.startProgressIndicator($indicator);
+				
+				$.post(url,{data: JSON.stringify(postdata)}, null, "json").then(function(data) {
+					return (new CyberCommons()).getStatusOfTask(data.task_id);
+				}).then(function(data) {
+					var angle = data.tombstone[0].result.sunelevation;
+					me.stopProgressIndicator($indicator);
+					app.set('angleComputed',true);
+					app.set('sunangle',angle);
+				},function(error) {
+					me.stopProgressIndicator($indicator);
+					log("post failed", error);
+				});
+			},
+
+			sunAngleData: function() {
 				var twilights = this.formattedEventData(app.get('events'),app.get('calibrationPeriod'));
-				var postdata = {
+				return {
 					release_location: app.get('releaseLocation'),
 					threshold: app.get('threshold'),
 					tagname: app.get('tagname'),
 					twilights: twilights
-				}
-				
-				log(postdata);
-				
-				this.startProgressIndicator($indicator);
-				$.post(url,{data: JSON.stringify(postdata)}, null, "json")
-					.fail(function(jqXHR, status) {
-						log("post failed", status);
-						me.stopProgressIndicator($indicator);
-					})
-					.done(function(data) {
-						log("post completed",data, typeof data);
-						if (!data.task_id) {
-							log("no task id returned");
-							me.stopProgressIndicator($indicator);
-							return;
-						}
-
-						var cb = new CyberCommons();
-						cb.getStatusOfTask(data.task_id)
-							.always(function() {
-								me.stopProgressIndicator($indicator);
-							})
-							.fail(function(jqXHR, status) {
-								log("failed to retrieve task status",status);
-							})
-							.done(function(data) {
-								var angle = data.tombstone[0].result.sunelevation;
-								log("task status resolved", angle, data);
-								app.set('angleComputed',true);
-								app.set('sunangle',angle);
-							});
-					});
-				},
+				};
+			},
 
 			locations: function() {
-				if (!this.validateForProcessing()) return false;
+				if (!this.validateForProcessing()) 
+					return false;
 
-				var me = this;
 				var $indicator = $('#submit-for-processing i');
 				var $text = $('#submit-for-processing .text');
 				var $btn = $('#submit-for-processing');
-			
+				var me = this;
+
 				var url = 'http://test.cybercommons.org/queue/run/geologger.coord@geologger';
+				var postdata = this.locationsData();
+
+				this.startProgressIndicator($indicator);
+
+				$.post(url,{data: JSON.stringify(postdata)}, null, "json").then(function(data) {
+					$text.text('Data are being processed');
+					return (new CyberCommons()).getStatusOfTask(data.task_id);
+				}).then(function(data) {
+					$text.text('Success! Loading map data');
+					$btn.removeClass('btn-primary');
+					$btn.addClass('btn-info');
+
+					$('#app-tabs a[href="#map-tab"]').tab('show');
+					me.getGeoJSON();
+
+					me.stopProgressIndicator($indicator);
+					me.resetProcessLocationsButton();
+				},function(error) {
+					me.stopProgressIndicator($indicator);
+					me.showProcessLocationsError();
+					log("post failed", error);
+				});
+			},
+
+			locationsData: function() {
 				var twilights = this.formattedEventData(app.get('events'));
-				var postdata = {
+				return {
 					threshold: +app.get('threshold'),
 					tagname: app.get('tagname'),
 					twilights: twilights,
@@ -70,61 +83,44 @@ var app = app || Base.extend();
 					computed: app.get('angleComputed'),
 					release_location: app.get('releaseLocation')
 				};
+			},
 
-				this.startProgressIndicator($indicator);
-				$.post(url,{data: JSON.stringify(postdata)}, null, "json")
-					.fail(function(jqXHR, status) {
-						log("post failed", status);
-						$text.text('Error! Try again in a few seconds');
-						$btn.addClass('btn-danger');
-						setTimeout(function() {
-							$text.text("Submit for processing");
-							$btn.removeClass('btn-danger');
-							$btn.addClass('btn-primary');
-						},8000);
-					})
-					.done(function(data) {
-						log("post completed",data);
-						$text.text('Data are being processed');
-						
-						var cb = new CyberCommons();
-						cb.getStatusOfTask(data.task_id)
-							.always(function() {
-								me.stopProgressIndicator($indicator);
-								$btn.removeClass('btn-primary');
-							})
-							.fail(function(jqXHR, status) {
-								log("failed to retrieve task status",status);
-								$text.text('Error! Try again in a few seconds');
-								$btn.addClass('btn-danger');
-								setTimeout(function() {
-									$text.text("Submit for processing");
-									$btn.removeClass('btn-danger');
-									$btn.addClass('btn-primary');
-								},8000);
-							})
-							.done(function(data) {
-								log("status completed, grabbing geojson");
-								$text.text('Success! Loading map data');
-								$btn.addClass('btn-info');
+			showProcessLocationsError: function() {
+				var $text = $('#submit-for-processing .text');
+				var $btn = $('#submit-for-processing');
+				$text.text('Error! Try again in a few seconds');
+				$btn.removeClass('btn-primary');
+				$btn.addClass('btn-danger');
+				this.resetProcessLocationsButton();
+			},
 
-								$('#app-tabs a[href="#map-tab"]').tab('show');
-								me.getGeoJSON();
-
-								setTimeout(function() {
-									$text.text("Submit for processing");
-									$btn.removeClass('btn-info');
-									$btn.addClass('btn-primary');
-								},8000);
-							});
-					});
+			resetProcessLocationsButton: function() {
+				var $text = $('#submit-for-processing .text');
+				var $btn = $('#submit-for-processing');
+				setTimeout(function() {
+					$text.text("Submit for processing");
+					$btn.removeClass('btn-danger');
+					$btn.removeClass('btn-info');
+					$btn.addClass('btn-primary');
+				},8000);
 			},
 
 			getGeoJSON: function() {
-
+				// move this into the locations processing promise?
 				var me = this;
 				var url = 'http://test.cybercommons.org/mongo/db_find/geologger/coord/';
-				var props = {
+				url += JSON.stringify(this.geoJsonQuery());
+
+				$.getJSON(url).then(function(data) {
+	        me.updateCoordinates(data[0].features);
+	        app.map.drawGeoJSON(data[0].features);
+				}, function(error) {
+					log("geojson get failed", error);
+				});
+			},
+
+			geoJsonQuery: function() {
+				return {
 					spec: {
 						"properties.tagname": app.get('tagname'),
 						"properties.user_id": "guest"
@@ -132,18 +128,6 @@ var app = app || Base.extend();
 					sort: [["properties.timestamp",-1]],
 					limit: 1
 				}
-
-				url += JSON.stringify(props);
-
-				$.getJSON(url)
-					.fail(function(jqXHR, status) {
-		        log("geojson get failed", status);
-	        })
-	        .done(function(data) {
-	        	log("post completed",data);
-	        	app.map.drawGeoJSON(data[0].features);
-	        	me.updateCoordinates(data[0].features);
-	        });
 			},
 
 			updateCoordinates: function(features) {
@@ -192,7 +176,7 @@ var app = app || Base.extend();
 			},
 
 			releaseLocationIsValid: function(location) {
-				if (!location.length==2 || !location[0] || !location[1]) {
+				if (location.length!=2 || !location[0] || !location[1]) {
 					return false;
 				} else {
 					return true;
@@ -200,7 +184,7 @@ var app = app || Base.extend();
 			},
 
 			calibrationPeriodIsValid: function(period) {
-				if (!period.length==2 || !period[0] || !period[1] || 
+				if (period.length!=2 || !period[0] || !period[1] || 
 						 period[0] >= period[1]) {
 					return false;
 				} else {
@@ -209,7 +193,7 @@ var app = app || Base.extend();
 			},
 
 			sunAngleIsValid: function(angle) {
-				if (!angle) return false;
+				if (!angle && angle!==0) return false;
 				return true;
 			},
 
