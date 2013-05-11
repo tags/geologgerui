@@ -58,7 +58,7 @@ var app = app || Base.extend();
 				});
 
 				// and we have metadata
-
+				var location = this.formattedReleaseLocation(app.get('releaseLocation'));
 				var allOut = {
 					tilde: tilde,
 					latlngs: app.get('birdLocations'),
@@ -68,12 +68,12 @@ var app = app || Base.extend();
 						solar_elevation: app.get('sunangle'),
 						calibration: [
 							{
-								location: app.get('releaseLocation'),
+								location: location,
 								start_time: app.get('calibrationPeriod')[0],
 								stop_time: app.get('calibrationPeriod')[1]
 							}
 						],
-						release_location: app.get('releaseLocation'),
+						release_location: location,
 						release_time: "NA",
 						recapture_location: "NA",
 						recapture_time: "NA",
@@ -155,6 +155,18 @@ var app = app || Base.extend();
 				}
 
 				return dataOut;
+			},
+
+			// copied from process.js: abstract to String or use some kind of
+			// localization to handle formatting
+			formattedReleaseLocation: function(location) {
+				return _.map(location, function(x) {
+					if (typeof x === "string") {
+						return x.replace(',','.');
+					} else {
+						return x;
+					}
+				});
 			},
 
 			arrayOfObjectsToCSV: function(array) {

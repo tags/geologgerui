@@ -79,7 +79,7 @@
 			    <button class="btn btn-mini" title="Zoom out: z" data-function="zoomOut">
 			    	<i class="icon-zoom-out"></i>
 			    </button>
-			    <button class="btn btn-mini" title="Zoom in: z" data-function="zoomIn">
+			    <button class="btn btn-mini" title="Zoom in: x" data-function="zoomIn">
 			    	<i class="icon-zoom-in"></i>
 			    </button>
 			  </div>
@@ -212,7 +212,7 @@
 				<h5>Calibration Coordinates</h5>
 				<div class="form-horizontal error-group">
 					<div class="control-group">
-						<label class="control-label" for="latitude" data-toggle="tooltip" data-trigger="manual" data-placement='left' data-error='tooltip' title="Specify latitude and longitude">Latitude</label>
+						<label class="control-label" for="latitude" data-toggle="tooltip" data-trigger="manual" data-placement='left' data-error='tooltip' title="Specify latitude between -90 and 90 and longitude between -180 and 180">Latitude</label>
 						<div class="controls">
 			   			<input type="text" class="span2" name="latitude" placeholder="metadata">
 			    	</div>
@@ -237,7 +237,7 @@
 				    </div>
 			    </div>
 			    <div class="control-group">
-						<label class="control-label" for="cal-stop-date">Stop Date</label>   
+						<label class="control-label" for="cal-stop-date" data-toggle="tooltip" data-trigger="manual" data-placement="left" data-error="tooltip" title="The calibration period must include at least two active twilight events">Stop Date</label>   
 				    <div class="controls">
 				    	<input type="text" class="span2" name="cal-stop-date" placeholder="select">
 				    </div>
@@ -394,7 +394,7 @@
 	  // sun angle
 
 	  app.addObserver('sunangle', function(a) {
-	  	$('input[name=sun-angle]').val(a);
+	  	$('input[name=sun-angle]').val(a.toFixed(4));
 	  });
 	  $('input[name=sun-angle]').change(function() {
 	  	app.set('sunangle',$(this).val());

@@ -31,8 +31,9 @@ var app = app || Base.extend();
 			sunAngleData: function() {
 				console.log(app.get('events'));
 				var twilights = this.formattedEventData(app.get('events'),app.get('calibrationPeriod'));
+				var location = this.formattedReleaseLocation(app.get('releaseLocation'));
 				return {
-					release_location: app.get('releaseLocation'),
+					release_location: location,
 					threshold: app.get('threshold'),
 					tagname: app.get('tagname'),
 					twilights: twilights
@@ -75,6 +76,7 @@ var app = app || Base.extend();
 
 			locationsData: function() {
 				var twilights = this.formattedEventData(app.get('events'));
+				var location = this.formattedReleaseLocation(app.get('releaseLocation'));
 				return {
 					threshold: +app.get('threshold'),
 					tagname: app.get('tagname'),
@@ -82,7 +84,7 @@ var app = app || Base.extend();
 					calibperiod: app.get('calibrationPeriod'),
 					sunelevation: app.get('sunangle'),
 					computed: app.get('angleComputed'),
-					release_location: app.get('releaseLocation')
+					release_location: location
 				};
 			},
 
@@ -139,11 +141,19 @@ var app = app || Base.extend();
 
 			validateForSunAngle: function() {
 				this.hideAllLabelTooltips();
+				
+				var twilights = this.formattedEventData(app.get('events'),app.get('calibrationPeriod'));
+				var location = this.formattedReleaseLocation(app.get('releaseLocation'));
+
+				if (!this.eventDataIsValid(twilights)) {
+					this.showTooltipForLabel('cal-stop-date');
+					return false;
+				}
 				if (!this.lightThresholdIsValid(app.get('threshold'))) {
 					this.showTooltipForLabel('threshold'); 
 					return false;
 				}
-				if (!this.releaseLocationIsValid(app.get('releaseLocation'))) {
+				if (!this.releaseLocationIsValid(location)) {
 					this.showTooltipForLabel('latitude'); 
 					return false;
 				}
@@ -156,11 +166,19 @@ var app = app || Base.extend();
 
 			validateForProcessing: function() {
 				this.hideAllLabelTooltips();
+
+				var twilights = this.formattedEventData(app.get('events'));
+				var location = this.formattedReleaseLocation(app.get('releaseLocation'));
+				
+				if (!this.eventDataIsValid(twilights)) {
+					this.showTooltipForLabel('cal-stop-date');
+					return false;
+				}
 				if (!this.lightThresholdIsValid(app.get('threshold'))) {
 					this.showTooltipForLabel('threshold');
 					return false;
 				}
-				if (!this.releaseLocationIsValid(app.get('releaseLocation'))) {
+				if (!this.releaseLocationIsValid(location)) {
 					this.showTooltipForLabel('latitude');
 					return false;
 				}
@@ -177,10 +195,12 @@ var app = app || Base.extend();
 			},
 
 			releaseLocationIsValid: function(location) {
-				if (location.length!=2 || !location[0] || !location[1]) {
+				var lat = location[0], lon = location[1];
+				if (location.length!=2 || lat === undefined || lon === undefined) {
 					return false;
 				} else {
-					return true;
+					return (lat >= -90 && lat <= 90 &&
+									lon >= -180 && lon <= 180);
 				}
 			},
 
@@ -191,6 +211,15 @@ var app = app || Base.extend();
 				} else {
 					return true;
 				}
+			},
+
+			eventDataIsValid: function(data) {
+				return data.length >= 2;
+			},
+
+			calibrationCoordinatesAreValid: function(lat, lon) {
+				return (lat >= -90 && lat <= 90 &&
+								lon >= -180 && lon <= 180);
 			},
 
 			sunAngleIsValid: function(angle) {
@@ -213,6 +242,18 @@ var app = app || Base.extend();
 					delete fdata[i].problem;
 				}
 				return fdata.slice(0,-1);
+			},
+
+			// copied to exporter.js: abstract to String or use some kind of
+			// localization to handle formatting
+			formattedReleaseLocation: function(location) {
+				return _.map(location, function(x) {
+					if (typeof x === "string") {
+						return x.replace(',','.');
+					} else {
+						return x;
+					}
+				});
 			},
 
 		  startProgressIndicator: function($indicator) {
