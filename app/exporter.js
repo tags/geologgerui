@@ -39,7 +39,7 @@ var app = app || Base.extend();
 
 			exportJson: function(dataOut) {
 
-				// R serializes table data rather strangely, but economically
+				// R serializes table data strangely but economically
 				
 				var tilde = {
 					datetime: [],

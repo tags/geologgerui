@@ -29,6 +29,7 @@ var app = app || Base.extend();
 			},
 
 			sunAngleData: function() {
+				console.log(app.get('events'));
 				var twilights = this.formattedEventData(app.get('events'),app.get('calibrationPeriod'));
 				return {
 					release_location: app.get('releaseLocation'),

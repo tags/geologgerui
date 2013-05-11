@@ -73,4 +73,8 @@ describe("Process", function() {
 			expect(ps.sunAngleIsValid(undefined)).toBe(false);
 		});
 	});
+
+	describe("#formattedEventData()", function() {
+		//...
+	});
 });
