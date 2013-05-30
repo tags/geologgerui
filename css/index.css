@@ -1,0 +1,67 @@
+#content {
+  margin-top: 20px;
+}
+
+#datasets {
+  min-height: 500px;
+}
+
+#progress-indicator {
+  display: inline-block;
+  margin: 15px 6px 0 0;
+}
+
+.show-edit {
+  padding-top: 13px;
+}
+
+.dataset-link .date {
+  display: block;
+}
+
+/* new birds */
+
+.help-inline {
+  padding-bottom: 10px;
+}
+
+legend {
+  margin-bottom: 10px;
+}
+
+legend.select-file {
+  margin-bottom: 10px;
+}
+
+/*input[type=file] {
+  margin: 10px 0;
+}*/
+
+#drop-zone {
+  border: 2px #ccc dashed;
+  margin: 10px 0 30px;
+  padding: 20px;
+  font-size: 1.2em;
+}
+#drop-zone .or-drop {
+  text-align: center;
+}
+
+input[type=file].error {
+  color: #b94a48;
+}
+
+.file-success {
+  border-color: #468847 !important;
+  background: #dff0db;
+}
+
+.file-error {
+  border-color: #b94a48 !important;
+  background: #f2dede; 
+}
+
+.file-invalid {
+  border-color: #b94a48 !important;
+  color: #b94a48;
+}
