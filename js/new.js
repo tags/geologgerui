@@ -1,109 +1,10 @@
-var eli1 = "datetime,light";
-var eli2 = "2011-06-18 10:24:30,2";
-var bas = "ok,19/02/10 20:16:00,40228.844444,9";
-var sumner = "1  1 2000-10-27 22:44:00     191   NA     0";
-var stefan1 = "datetime        light";
-var stefan2 = "01.07.2010 00:01        2";
-
-var exp = {
-  eli: {
-    name: "TAGS",
-    header: /(datetime,light)/,
-    re: /(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d),(\d+)/,
-    parse: function(d) {
-      // new Date(d) works as well, but let's be specific
-      return new Date(d.replace(' ','T') + 'Z');
-    },
-    dateIndex: 1,
-    lightIndex: 2
-  },
-  bas: {
-    name: "BAS",
-    re: /\w*,(\d\d\/\d\d\/\d\d \d\d:\d\d:\d\d),\d+.*\d+,(\d+)/,
-    parse: function(d) {
-      // day/month/2year
-      var day = d.slice(0,2);
-          month = d.slice(3,5);
-          year = "20" + d.slice(6,8);
-          time = d.slice(9,17);
-      return new Date(year+"-"+month+"-"+day+"T"+time+"Z");
-    },
-    dateIndex: 1,
-    lightIndex: 2
-  }
-};
-
-console.log(exp.bas.header);
-
-var eliReg1 = /(datetime,light)/;
-var eli1Match = eli1.match(eliReg1);
-console.log(eli1Match);
-
-var eli2Reg = /(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d),(\d+)/;
-var eli2Match = eli2.match(eli2Reg);
-console.log(eli2Match);
-console.log(exp.eli.parse(eli2Match[1]));
-
-var basReg = /\w*,(\d\d\/\d\d\/\d\d \d\d:\d\d:\d\d),\d+.*\d+,(\d+)/;
-var basMatch = bas.match(basReg);
-console.log(basMatch);
-console.log(new Date(exp.bas.parse(basMatch[1])));
-
-console.log(dataFormat(eli1).name);
-console.log(dataFormat(eli2).name);
-console.log(dataFormat(bas).name);
 
 
-function dataFormat(line) {
-  var exp = expressions();
-  for (var i = 0; i < exp.length; i++) {
-    var format = exp[i];
-    if (format.header && line.match(format.header)) {
-      return format;
-    } else if (line.match(format.re)) {
-      return format;
-    }
-  }
-  return null;
-}
-
-function expressions() {
-  return [
-    {
-      name: "TAGS",
-      header: /(datetime,light)/,
-      hasHeader: true,
-      re: /(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d),(\d+)/,
-      parse: function(d) {
-        // new Date(d) works as well, but let's be specific
-        return new Date(d.replace(' ','T') + 'Z');
-      },
-      dateIndex: 1,
-      lightIndex: 2
-    },
-    {
-      name: "BAS",
-      re: /\w*,(\d\d\/\d\d\/\d\d \d\d:\d\d:\d\d),\d+.*\d+,(\d+)/,
-      parse: function(d) {
-        // day/month/2year
-        var day = d.slice(0,2);
-            month = d.slice(3,5);
-            year = "20" + d.slice(6,8);
-            time = d.slice(9,17);
-        return new Date(year+"-"+month+"-"+day+"T"+time+"Z");
-      },
-      dateIndex: 1,
-      lightIndex: 2
-    }
-  ];
-}
-
+// Requires dataset_parser.js
 
 $(function() {
 
   var data = undefined;
-
-  // todo: limit to one
 
   function handleFileSelect(evt) {
     var files = evt.target.files; // FileList object
@@ -124,10 +25,18 @@ $(function() {
     var reader = new FileReader();
 
     reader.onload = function(f) {
-      console.log(f.target.result);
+      //console.log(f.target.result);
       var lines = f.target.result.trim().split(/\r?\n|\r/g);
-      console.log(lines);
-      var format = dataFormat(lines[0]);
+      //console.log(lines);
+      var format = (new DataSetParser).formatOf(lines[0]);
+
+      if (!format) {
+        console.log("Unable to parse file");
+        $('#drop-zone').addClass("file-error");
+        $('#drop-zone .or-drop').text("Unable to parse this file. TAGS and BAS formats are currently supported.");
+        return;
+      }
+
       console.log(format.name);
 
       if (format.hasHeader) lines.shift();
@@ -155,8 +64,9 @@ $(function() {
         datacount: vals.length
       }));
 
-      $('#drop-zone').addClass('file-success');
       $('#drop-zone').removeClass("file-invalid");
+      $('#drop-zone').removeClass("file-error");
+      $('#drop-zone').addClass('file-success');
       $('#file-input').removeClass('error');
       data = vals;
     }
