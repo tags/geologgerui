@@ -41,8 +41,8 @@
               <span class="pull-right" id="progress-indicator"></span>
               <form class="form-search">
               <div class="input-append">
-                <input type="text" class="span2 search-query" placeholder="search my datasets">
-                <button type="submit" class="btn">Search</button>
+                <input type="text" class="span2 search-query" id="search-field" placeholder="search my datasets">
+                <button type="submit" id="search-btn" class="btn">Search</button>
               </div>
               </form>
             </li>
@@ -201,7 +201,7 @@
     </script>
 
     <script type="text/template" class="datasets-template">
-      <li><a href="/datasets/{{=d.tagname}}" data-object-id="{{=d.tagname}}" class="dataset-link">{{=d.tagname}}<span class="date"><small>{{=d.date.toDateString()}}</small></span></a></li>
+      <li class="dataitem" data-object-id="{{=d.tagname}}"><a href="/datasets/{{=d.tagname}}" data-object-id="{{=d.tagname}}" class="dataset-link">{{=d.tagname}}<span class="date"><small>{{=d.date.toDateString()}}</small></span></a></li>
     </script>
 
     <script type="text/template" class="show-dataset-template">
@@ -306,10 +306,14 @@
         function injectDatasets(ds) {
           var template = _.template($('script.datasets-template').html());
           _.each(ds, function(el) {
-            $('#datasets').append(
-              template({d:el})
-            );
+            addDatasetToList(el, template);
           });
+        }
+
+        function addDatasetToList(el, template) {
+          $('#datasets').append(
+            template({d:el})
+          );
         }
 
         function updateDatasetsEventHandlers() {
@@ -344,6 +348,29 @@
           $('#viewbird').html(
             template({d:d})
           );
+        }
+
+        // search the datasets
+
+        $('#search-btn').click(function() {
+          searchDatasets($('#search-field').val());
+          return false;
+        });
+
+        $('#search-field').on('input', function(e) {
+          searchDatasets($(this).val());
+          return false;
+        });
+
+        function searchDatasets(input) {
+          var text = new RegExp(input, "i");
+          var filteredOut = _.filter(datasets, function(d) {
+            return !d.tagname.match(text);
+          });
+          $('.dataitem').show();
+          _.each(filteredOut, function(d) {
+            $('li[data-object-id="'+d.tagname+'"]').hide();
+          });
         }
 
       });
