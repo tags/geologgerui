@@ -36,7 +36,7 @@ $(function() {
         $('#drop-zone .or-drop').text("Unable to parse this file. TAGS and BAS formats are currently supported.");
         return;
       } else {
-        console.log("Parsed file foramt:", format.name);
+        console.log("Parsed file format:", format.name);
       }
 
       if (format.hasHeader) lines.shift();
@@ -106,7 +106,7 @@ $(function() {
     var url = "http://test.cybercommons.org/queue/run/geologger.importTagData@geologger";
     var upload = dataForUpload();
     
-    console.log(JSON.stringify(upload));
+    //console.log(JSON.stringify(upload));
     console.log("uploading");
 
     $('#upload-indicator').spin({
@@ -187,14 +187,38 @@ $(function() {
   }
 
   function showUploadSuccess(data) {
+    // stop indicators
     $('.uploading-notification').hide();
     $('#upload-indicator').spin(false);
-    showDatasets();
+
+    // reload dataset list
+    showDatasets(function() {
+
+      // build success html
+      $('#upload-success .title').text(get('name'));
+      $('#upload-success .link').attr('href', "datasets/"+get('name'));
+
+      // show success notifications
+      $('#upload-success').show();
+      $(window).scrollTop(0);
+
+      // respond to a link click
+      $('#upload-success .link').click(function() {
+        $('#newbird').hide();
+        $('#viewbird').show();
+        loadDataset($('#upload-success .title').text());
+        return false;
+      });
+
+    });;
   }
 
   function showUploadError(data) {
     $('.uploading-notification').hide();
     $('#upload-indicator').spin(false);
+
+    $('#upload-error').show();
+    $(window).scrollTop(0);
   }
 
 });

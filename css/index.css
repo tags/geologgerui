@@ -120,3 +120,15 @@ input[type=file].error {
   display: inline-block;
   margin: 5px 15px;
 }
+
+.alert h4 {
+  margin-bottom: 20px;
+}
+
+#upload-success {
+  display: none;
+}
+
+#upload-error {
+  display: none;
+}

@@ -88,6 +88,18 @@
             <!-- introduction, alerts, show -->
             <div id="viewbird"></div>
             <div id="newbird" style="display:none;">
+
+              <div id="upload-success" class="alert alert-success">
+                <h4>Upload complete</h4>
+                <p><span class="title">Filename</span> was successfully uploaded. 
+                <a class="link" href="#">Take me there</a></p>
+              </div>
+
+              <div id="upload-error" class="alert alert-error">
+                <h4>Upload failed</h4>
+                <p>There was a problem uploading the data. You might try again in a few minutes.</p>
+              </div>
+
               <h3>Upload dataset</h3>
               <form id="create-new-dataset" action="">
                 <fieldset>
@@ -311,7 +323,7 @@
         return this;
       };
 
-      function showDatasets() {
+      function showDatasets(callback) {
         var url = 'http://test.cybercommons.org/mongo/db_find/geologger/lightlogs/';
         url += '{"fields":["tagname", "timestamp", "notes","release_location"], "spec": { "user_id":"guest" }}';
 
@@ -327,6 +339,10 @@
             injectDatasets(data);
             updateDatasetsEventHandlers();
             datasets = data;
+
+            if (callback) {
+              callback();
+            }
           });
       }
 
