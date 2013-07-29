@@ -70,7 +70,7 @@
               <img src="img/logos/tags_logo.jpg" class="logo" id="tags-logo">
               <p class="instructions">
                 Select a dataset from the left, or
-                <a href="#new" class="newdataset-link">upload a new datastet</a>.
+                <a href="#new" class="newdataset-link">upload a new datastet</a>
               </p>
               <p style="margin-top:40px;">
                 If you would like to upload private datasets, <br>
@@ -324,8 +324,8 @@
       };
 
       function showDatasets(callback) {
-        var url = 'http://test.cybercommons.org/mongo/db_find/geologger/lightlogs/';
-        url += '{"fields":["tagname", "timestamp", "notes","release_location"], "spec": { "user_id":"guest" }}';
+        
+        var url = "http://test.cybercommons.org/geologger/lightlogs";
 
         $.getJSON(url)
           .always(function() {
