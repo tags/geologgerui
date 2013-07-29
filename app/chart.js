@@ -178,9 +178,7 @@ var app = app || Base.extend();
 			load: function(filepath) {
 
 				var me = this;
-				
-				var url = 'http://test.cybercommons.org/mongo/db_find/geologger/lightlogs/';
-				url += ( '{"spec": { "tagname":"'+filepath+'", "user_id":"guest" }}' )
+				var url = "http://test.cybercommons.org/geologger/lightlogs/" + filepath;
 
 				me.set('readyState',1);	
 				d3.json(url, function(error,json) {
