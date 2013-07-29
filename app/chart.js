@@ -178,7 +178,7 @@ var app = app || Base.extend();
 			load: function(filepath) {
 
 				var me = this;
-				var url = "http://test.cybercommons.org/geologger/lightlogs/" + filepath;
+				var url = "http://test.cybercommons.org/geologger/lightlogs/tagname/" + filepath;
 
 				me.set('readyState',1);	
 				d3.json(url, function(error,json) {
