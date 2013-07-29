@@ -326,6 +326,7 @@
       function showDatasets(callback) {
         
         var url = "http://test.cybercommons.org/geologger/lightlogs/tagname/";
+        url += "?callback=?"
 
         $.getJSON(url)
           .always(function() {
