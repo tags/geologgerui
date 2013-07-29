@@ -207,7 +207,7 @@
     </script>
 
     <script type="text/template" class="show-dataset-template">
-      <a href="{{=d.tagname}}/edit" class="pull-right show-edit">Edit</a>
+      <!--<a href="{{=d.tagname}}/edit" class="pull-right show-edit">Edit</a>-->
       <h3>{{=d.tagname}}</h3>
       <p>Created on {{=d.date.toDateString()}}</p>
       <p>{{=d.notes}}</p>
@@ -219,14 +219,14 @@
         <thead>
           <tr>
             <th width="66%" colspan="2">Step</th>
-            <th>Status</th>
+            <!--<th>Status</th>-->
           </tr>
         </thead>
         <tbody>
           <tr>
             <td width="5%">1.</td>
             <td><a href="calibrate.html#{{=d.tagname}}">GeoLight <span class="raquo">&raquo;</span></a></td>
-            <td>Requires action</td>
+            <!--<td>Requires action</td>-->
           </tr>
           <!--
           <tr>
@@ -237,11 +237,12 @@
           -->
         </tbody>
       </table>
-
+      <!--
       <br>
       <h4>View results (coming)</h4>
       <p><a href="#" class="muted">View map</a></p>
       <p><a href="#" class="muted">View report</a></p>
+      -->
     </script>
 
     <script type="text/javascript">
