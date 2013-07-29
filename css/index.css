@@ -1,11 +1,17 @@
+
+body {
+  margin-bottom: 10px;
+}
+
 #content {
   margin-top: 20px;
   border-bottom: 1px dotted #ddd;
   padding-bottom: 20px;
 }
 
-body {
-  margin-bottom: 10px;
+#index {
+  min-height: 560px;
+  position: relative;
 }
 
 #index .footer {
@@ -13,7 +19,7 @@ body {
   padding-top: 15px;
   border-top: 1px solid #ccc;
   width: 600px;
-  bottom: 20px;
+  bottom: 0;
   position: absolute;
 }
 
@@ -34,7 +40,7 @@ body {
 }
 
 #datasets {
-  min-height: 500px;
+  min-height: 560px;
   max-height: 580px;
   overflow-y: scroll;
   overflow-x: auto;
@@ -98,4 +104,19 @@ input[type=file].error {
 .file-invalid {
   border-color: #b94a48 !important;
   color: #b94a48;
+}
+
+#validation-error {
+  margin-left: 10px;
+  display: none;
+}
+
+.uploading-notification {
+  margin-top:20px;
+  display:none;
+}
+
+#upload-indicator {
+  display: inline-block;
+  margin: 5px 15px;
 }

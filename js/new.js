@@ -3,6 +3,7 @@
 // Requires dataset_parser.js
 
 $(function() {
+  "use strict";
 
   var data = undefined;
 
@@ -25,9 +26,8 @@ $(function() {
     var reader = new FileReader();
 
     reader.onload = function(f) {
-      //console.log(f.target.result);
+     
       var lines = f.target.result.trim().split(/\r?\n|\r/g);
-      //console.log(lines);
       var format = (new DataSetParser).formatOf(lines[0]);
 
       if (!format) {
@@ -35,9 +35,9 @@ $(function() {
         $('#drop-zone').addClass("file-error");
         $('#drop-zone .or-drop').text("Unable to parse this file. TAGS and BAS formats are currently supported.");
         return;
+      } else {
+        console.log("Parsed file foramt:", format.name);
       }
-
-      console.log(format.name);
 
       if (format.hasHeader) lines.shift();
       var vals = _.map(lines, function(x) {
@@ -54,7 +54,7 @@ $(function() {
         }
       });
 
-      console.log(vals);
+      //console.log(vals);
 
       var template = _.template($('script.dataset-info-template').html());
       $('#drop-zone .or-drop').html(template({
@@ -88,26 +88,42 @@ $(function() {
 
   var DateFormat = "yy-mm-dd";
   $('input[name=release-date], input[name=capture-date]').datepicker({
-      showOtherMonths: true,
-      selectOtherMonths: true,
-      defaultDate: new Date(),
-      dateFormat: DateFormat
-    });
+    showOtherMonths: true,
+    selectOtherMonths: true,
+    defaultDate: new Date(),
+    dateFormat: DateFormat
+  });
 
 
   $('#create-new-dataset').submit(function() {
-    if (!validateInput()) return false;
+    if (!validateInput()) {
+      $('#validation-error').show();
+      return false;
+    } else {
+      $('#validation-error').hide();
+    }
     
     var url = "http://test.cybercommons.org/queue/run/geologger.importTagData@geologger";
     var upload = dataForUpload();
+    
     console.log(JSON.stringify(upload));
+    console.log("uploading");
+
+    $('#upload-indicator').spin({
+      color: '#333',
+      radius: 4,
+      width: 2
+    });
+    $('.uploading-notification').show();
 
     $.post(url, {data: JSON.stringify(upload)}, null, "json").then(function(data) {
       return (new CyberCommons()).getStatusOfTask(data.task_id);
     }).then(function(data) {
-      log("post completed", data);
+      console.log("post completed", data);
+      showUploadSuccess(data);
     },function(error) {
-      log("post failed", error);
+      console.log("post failed", error);
+      showUploadError(data);
     });
 
     return false;
@@ -168,6 +184,17 @@ $(function() {
 
   function getNotes() {
     return $('textarea[name=notes]').val().trim();
+  }
+
+  function showUploadSuccess(data) {
+    $('.uploading-notification').hide();
+    $('#upload-indicator').spin(false);
+    showDatasets();
+  }
+
+  function showUploadError(data) {
+    $('.uploading-notification').hide();
+    $('#upload-indicator').spin(false);
   }
 
 });
