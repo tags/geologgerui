@@ -1,9 +1,36 @@
 #content {
   margin-top: 20px;
+  border-bottom: 1px dotted #ddd;
+  padding-bottom: 20px;
 }
 
 body {
   margin-bottom: 10px;
+}
+
+#index .footer {
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid #ccc;
+  width: 600px;
+  bottom: 20px;
+  position: absolute;
+}
+
+#index .footer img {
+  float: left;
+  margin: 0 10px;
+  height: 140px;
+}
+
+#tags-logo {
+  width: 240px;
+  margin-bottom: 30px;
+}
+
+.instructions {
+  font-size: 18px;
+  line-height: 24px;
 }
 
 #datasets {
