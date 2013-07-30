@@ -116,7 +116,7 @@ $(function() {
     });
     $('.uploading-notification').show();
 
-    $.post(url, {data: JSON.stringify(upload)}, null, "json").then(function(data) {
+    $.post(url, {data: JSON.stringify(upload), user_id: true}, null, "json").then(function(data) {
       return (new CyberCommons()).getStatusOfTask(data.task_id);
     }).then(function(data) {
       console.log("post completed", data);
