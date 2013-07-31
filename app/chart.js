@@ -179,7 +179,7 @@ var app = app || Base.extend();
 
 				var me = this;
 				var url = "http://test.cybercommons.org/geologger/lightlogs/tagname/" + filepath;
-				//url += "?callback=?"
+				url += "?callback=?"
 
 				me.set('readyState',1);	
 				d3.json(url, function(error,json) {
