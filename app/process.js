@@ -15,7 +15,7 @@ var app = app || Base.extend();
 				
 				this.startProgressIndicator($indicator);
 				
-				$.post(url,{data: JSON.stringify(postdata), user_id: true}, null, "json").then(function(data) {
+				$.post(url,{data: JSON.stringify(postdata), user_id: true}, null, "jsonp").then(function(data) {
 					return (new CyberCommons()).getStatusOfTask(data.task_id);
 				}).then(function(data) {
 					var angle = data.tombstone[0].result.sunelevation;
