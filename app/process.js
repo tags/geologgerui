@@ -16,7 +16,7 @@ var app = app || Base.extend();
 				this.startProgressIndicator($indicator);
 				
 				$.post(url,{data: JSON.stringify(postdata), user_id: true}, null, "jsonp").then(function(data) {
-					return (new CyberCommons()).getStatusOfTask(data.task_id);
+					return (new CyberCommons()).getStatusOfTask(app.get('host'), data.task_id);
 				}).then(function(data) {
 					var angle = data.tombstone[0].result.sunelevation;
 					me.stopProgressIndicator($indicator);
@@ -55,7 +55,7 @@ var app = app || Base.extend();
 
 				$.post(url,{data: JSON.stringify(postdata), user_id: true}, null, "json").then(function(data) {
 					$text.text('Data are being processed');
-					return (new CyberCommons()).getStatusOfTask(data.task_id);
+					return (new CyberCommons()).getStatusOfTask(app.get('host'), data.task_id);
 				}).then(function(data) {
 					$text.text('Success! Loading map data');
 					$btn.removeClass('btn-primary');
