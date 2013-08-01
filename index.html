@@ -424,6 +424,7 @@
       }
 
       function isLoggedIn() {
+        console.log($.cookie('auth_tkt'));
         return $.cookie('auth_tkt');
       }
 
@@ -447,10 +448,10 @@
         // change login/logout label
 
         if (isLoggedIn()) {
-          $('#login-link').attr('url', 'http://apps.cybercommons.org/accounts/logout/');
+          $('#login-link').attr('href', 'http://apps.cybercommons.org/accounts/logout/');
           $('#login-link').text("Logout");
         } else {
-          $('#login-link').attr('url', 'http://apps.cybercommons.org/accounts/login/');
+          $('#login-link').attr('href', 'http://apps.cybercommons.org/accounts/login/');
           $('#login-link').text("Login");
         }
 

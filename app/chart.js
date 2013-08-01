@@ -182,6 +182,28 @@ var app = app || Base.extend();
 				url += "?callback=?"
 
 				me.set('readyState',1);	
+
+				$.ajax({
+					type:"GET", 
+					url: url, 
+					data: {user_id: "true"}, 
+					dataType: "json", 
+					xhrFields: {withCredentials: true}, 
+					crossDomain: false 
+				}).then(function(json) {
+		       // set metadata
+				  app.set('releaseLocation',json[0].release_location);
+				  app.set('tagname',json[0].tagname);
+				  app.set('notes',json[0].notes);
+				  
+				  // set the data
+				  me.loadData(json[0].data);
+		    },function(error) {
+		      console.log("get failed", error);
+		    });
+
+				/*
+				me.set('readyState',1);	
 				d3.json(url, function(error,json) {
 				  // set metadata
 				  app.set('releaseLocation',json[0].release_location);
@@ -191,6 +213,7 @@ var app = app || Base.extend();
 				  // set the data
 				  me.loadData(json[0].data);
 				});
+				*/
 			},
 
 			loadData: function(data) {
