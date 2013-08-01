@@ -103,7 +103,7 @@ $(function() {
       $('#validation-error').hide();
     }
     
-    var url = "http://test.cybercommons.org/queue/run/geologger.importTagData@geologger";
+    var url = app.get('host') + "/queue/run/geologger.importTagData@geologger";
     var upload = dataForUpload();
     
     //console.log(JSON.stringify(upload));

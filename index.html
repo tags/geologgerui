@@ -308,6 +308,9 @@
       
       // globally define functions so they are accessible from other scripts
 
+      var app = app || {};
+      app.host = "http://test.cybercommons.org";
+
       var datasets = undefined;
 
       // required for rails
@@ -335,7 +338,7 @@
 
       function showDatasets(callback) {
         
-        var url = "http://test.cybercommons.org/geologger/lightlogs/tagname/";
+        var url = app.host + "/geologger/lightlogs/tagname/";
         url += "?callback=?"
 
         $.getJSON(url)
@@ -424,7 +427,6 @@
       }
 
       function isLoggedIn() {
-        console.log($.cookie('auth_tkt'));
         return $.cookie('auth_tkt');
       }
 

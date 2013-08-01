@@ -20,7 +20,7 @@ var CyberCommons = function() {
 		var promise = new $.Deferred();
 		var timer;
 		var args = {
-			host: 'http://test.cybercommons.org/queue/task/',
+			host: app.get('host') + "/queue/task/",
 			task_id: taskID,
 			onFailure: function(data) {
 				clearInterval(timer);
