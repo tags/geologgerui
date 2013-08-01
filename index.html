@@ -31,7 +31,7 @@
             <li><a href="index.html">Datasets</a></li>
           </ul>
           <ul class="nav pull-right">
-            <li><a href="http://apps.cybercommons.org/accounts/login/">Login</a></li>
+            <li><a href="http://apps.cybercommons.org/accounts/login/" id="login-link">Login</a></li>
           </ul>
         </div>
       </div>
@@ -423,12 +423,16 @@
         });
       }
 
+      function isLoggedIn() {
+        return $.cookie('auth_tkt');
+      }
+
       // but defer interface hookup and load execution until the page is ready
 
       $(function() {
         "use strict";
 
-        // search the datasets
+        // inteface hookup: search the datasets
 
         $('#search-btn').click(function() {
           searchDatasets($('#search-field').val());
@@ -439,6 +443,16 @@
           searchDatasets($(this).val());
           return false;
         });
+
+        // change login/logout label
+
+        if (isLoggedIn()) {
+          $('#login-link').attr('url', 'http://apps.cybercommons.org/accounts/logout/');
+          $('#login-link').text("Logout");
+        } else {
+          $('#login-link').attr('url', 'http://apps.cybercommons.org/accounts/login/');
+          $('#login-link').text("Login");
+        }
 
         // and do the deed: load the datasets
 
