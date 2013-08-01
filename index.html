@@ -40,7 +40,6 @@
     <div class="container" id="content">
       <div class="row">
         <div class="span4">
-          <!--<h3>Datasets</h3>-->
           <ul class="nav nav-list well" id="datasets">
             
             <li>
@@ -59,7 +58,11 @@
             <li class="divider"></li>
 
             <li class="nav-header">My Datasets</li>
+
             <!-- datasets here -->
+            <ul id="sets" class="nav nav-list">
+
+            </ul>
           </ul>
 
         </div> <!-- span4: nav -->
@@ -349,6 +352,7 @@
             log("failed", status);
           })
           .done(function(data) {
+            $('#datasets #sets').empty();
             cleanupDatasets(data)
             injectDatasets(data);
             updateDatasetsEventHandlers();
@@ -374,7 +378,7 @@
       }
 
       function addDatasetToList(el, template) {
-        $('#datasets').append(
+        $('#datasets #sets').append(
           template({d:el})
         );
       }

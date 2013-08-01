@@ -58,6 +58,11 @@ body {
   display: block;
 }
 
+#sets {
+  margin-left: 0;
+  padding-left: 0;
+}
+
 /* new birds */
 
 .help-inline {
