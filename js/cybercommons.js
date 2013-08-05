@@ -16,11 +16,11 @@ var CyberCommons = function() {
       });
 	}
 
-	this.getStatusOfTask = function(taskID) {
+	this.getStatusOfTask = function(appHost, taskID) {
 		var promise = new $.Deferred();
 		var timer;
 		var args = {
-			host: 'http://test.cybercommons.org/queue/task/',
+			host: appHost + "/queue/task/",
 			task_id: taskID,
 			onFailure: function(data) {
 				clearInterval(timer);

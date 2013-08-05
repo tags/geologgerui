@@ -103,7 +103,7 @@ $(function() {
       $('#validation-error').hide();
     }
     
-    var url = "http://test.cybercommons.org/queue/run/geologger.importTagData@geologger";
+    var url = app.host + "/queue/run/geologger.importTagData@geologger";
     var upload = dataForUpload();
     
     //console.log(JSON.stringify(upload));
@@ -116,8 +116,9 @@ $(function() {
     });
     $('.uploading-notification').show();
 
-    $.post(url, {data: JSON.stringify(upload)}, null, "json").then(function(data) {
-      return (new CyberCommons()).getStatusOfTask(data.task_id);
+
+    $.ajax({type:"POST", url: url, data: {data: JSON.stringify(upload), user_id: "true" }, dataType: "json", xhrFields: {withCredentials: true}, crossDomain: false }).then(function(data) {
+      return (new CyberCommons()).getStatusOfTask(app.host, data.task_id);
     }).then(function(data) {
       console.log("post completed", data);
       showUploadSuccess(data);

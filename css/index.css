@@ -5,7 +5,6 @@ body {
 
 #content {
   margin-top: 20px;
-  border-bottom: 1px dotted #ddd;
   padding-bottom: 20px;
 }
 
@@ -25,13 +24,13 @@ body {
 
 #index .footer img {
   float: left;
-  margin: 0 10px;
-  height: 140px;
+  margin: 10px 10px 0 10px;
+  height: 40px;
 }
 
 #tags-logo {
-  width: 240px;
-  margin-bottom: 30px;
+  width: 200px;
+  margin: 20px 0 30px;
 }
 
 .instructions {
@@ -57,6 +56,11 @@ body {
 
 .dataset-link .date {
   display: block;
+}
+
+#sets {
+  margin-left: 0;
+  padding-left: 0;
 }
 
 /* new birds */

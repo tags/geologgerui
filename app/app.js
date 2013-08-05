@@ -9,6 +9,10 @@ var OneHalfDay = OneDay/2;
 var OneQuarterDay = OneDay/4;
 
 (function() {
+	
+	// app hostname
+	app.set('host', 'http://test.cybercommons.org');
+
 	// default values, some explicitly undefined
 
 	app.set('threshold',5.5); // threshold

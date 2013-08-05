@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>TAGS: Datasets</title>
+    <meta charset="utf-8">
+
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script src="http://code.jquery.com/ui/1.10.2/jquery-ui.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.4.4/underscore-min.js"></script>
@@ -12,7 +14,9 @@
     <script src="js/dataset_parser.js"></script>
     <script src="js/log.js"></script>
     <script src="js/new.js"></script>
+    <script src="js/jquery.cookie.js"></script>
 
+    <link href="http://code.jquery.com/ui/1.10.2/themes/smoothness/jquery-ui.min.css" rel="stylesheet">
     <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/index.css" rel="stylesheet">
 
@@ -22,12 +26,12 @@
     <div class="navbar navbar-static-top">
       <div class="navbar-inner">
         <div class="container">
-          <a class="brand" href="/">TAGS</a>
+          <a class="brand" href="index.html">TAGS</a>
           <ul class="nav">
             <li><a href="index.html">Datasets</a></li>
           </ul>
           <ul class="nav pull-right">
-            <li><a href="http://apps.cybercommons.org/accounts/login/">Login</a></li>
+            <li><a href="http://apps.cybercommons.org/accounts/login/" id="login-link">Login</a></li>
           </ul>
         </div>
       </div>
@@ -36,7 +40,6 @@
     <div class="container" id="content">
       <div class="row">
         <div class="span4">
-          <!--<h3>Datasets</h3>-->
           <ul class="nav nav-list well" id="datasets">
             
             <li>
@@ -55,7 +58,11 @@
             <li class="divider"></li>
 
             <li class="nav-header">My Datasets</li>
+
             <!-- datasets here -->
+            <ul id="sets" class="nav nav-list">
+
+            </ul>
           </ul>
 
         </div> <!-- span4: nav -->
@@ -82,6 +89,12 @@
                 <img src="img/logos/obs_logo.gif" class="logo">
                 <img src="img/logos/nsf_logo.gif" class="logo">
                 <img src="img/logos/nceas_logo.png" class="logo">
+                <img src="img/logos/cornell_logo.jpg" class="logo">
+                <img src="img/logos/mpg_logo.png" class="logo">
+                <img src="img/logos/unknown_logo.gif" class="logo">
+                <img src="img/logos/movebank_logo.png" class="logo">
+                <img src="img/logos/imas_utas_logo.jpg" class="logo">
+                <img src="img/logos/cybercommons_logo.png" class="logo">
               </div>
             </div>
 
@@ -298,6 +311,9 @@
       
       // globally define functions so they are accessible from other scripts
 
+      var app = app || {};
+      app.host = "http://test.cybercommons.org";
+
       var datasets = undefined;
 
       // required for rails
@@ -325,7 +341,7 @@
 
       function showDatasets(callback) {
         
-        var url = "http://test.cybercommons.org/geologger/lightlogs/tagname/";
+        var url = app.host + "/geologger/lightlogs/tagname/";
         url += "?callback=?"
 
         $.getJSON(url)
@@ -336,6 +352,7 @@
             log("failed", status);
           })
           .done(function(data) {
+            $('#datasets #sets').empty();
             cleanupDatasets(data)
             injectDatasets(data);
             updateDatasetsEventHandlers();
@@ -361,7 +378,7 @@
       }
 
       function addDatasetToList(el, template) {
-        $('#datasets').append(
+        $('#datasets #sets').append(
           template({d:el})
         );
       }
@@ -413,12 +430,16 @@
         });
       }
 
+      function isLoggedIn() {
+        return $.cookie('auth_tkt');
+      }
+
       // but defer interface hookup and load execution until the page is ready
 
       $(function() {
         "use strict";
 
-        // search the datasets
+        // inteface hookup: search the datasets
 
         $('#search-btn').click(function() {
           searchDatasets($('#search-field').val());
@@ -429,6 +450,16 @@
           searchDatasets($(this).val());
           return false;
         });
+
+        // change login/logout label
+
+        if (isLoggedIn()) {
+          $('#login-link').attr('href', 'http://apps.cybercommons.org/accounts/logout/');
+          $('#login-link').text("Logout");
+        } else {
+          $('#login-link').attr('href', 'http://apps.cybercommons.org/accounts/login/');
+          $('#login-link').text("Login");
+        }
 
         // and do the deed: load the datasets
 

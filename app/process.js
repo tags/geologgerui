@@ -10,13 +10,13 @@ var app = app || Base.extend();
 				var $indicator = $('#sun-angle-indicator');
 				var me = this;
 
-				var url = "http://test.cybercommons.org/queue/run/geologger.getElevation@geologger";
+				var url = app.get('host') + "/queue/run/geologger.getElevation@geologger";
 				var postdata = this.sunAngleData();
 				
 				this.startProgressIndicator($indicator);
 				
-				$.post(url,{data: JSON.stringify(postdata)}, null, "json").then(function(data) {
-					return (new CyberCommons()).getStatusOfTask(data.task_id);
+				$.post(url,{data: JSON.stringify(postdata), user_id: true}, null, "jsonp").then(function(data) {
+					return (new CyberCommons()).getStatusOfTask(app.get('host'), data.task_id);
 				}).then(function(data) {
 					var angle = data.tombstone[0].result.sunelevation;
 					me.stopProgressIndicator($indicator);
@@ -29,7 +29,6 @@ var app = app || Base.extend();
 			},
 
 			sunAngleData: function() {
-				console.log(app.get('events'));
 				var twilights = this.formattedEventData(app.get('events'),app.get('calibrationPeriod'));
 				var location = this.formattedReleaseLocation(app.get('releaseLocation'));
 				return {
@@ -49,14 +48,14 @@ var app = app || Base.extend();
 				var $btn = $('#submit-for-processing');
 				var me = this;
 
-				var url = 'http://test.cybercommons.org/queue/run/geologger.coord@geologger';
+				var url = app.get('host') + "/queue/run/geologger.coord@geologger";
 				var postdata = this.locationsData();
 
 				this.startProgressIndicator($indicator);
 
-				$.post(url,{data: JSON.stringify(postdata)}, null, "json").then(function(data) {
+				$.post(url,{data: JSON.stringify(postdata), user_id: true}, null, "json").then(function(data) {
 					$text.text('Data are being processed');
-					return (new CyberCommons()).getStatusOfTask(data.task_id);
+					return (new CyberCommons()).getStatusOfTask(app.get('host'), data.task_id);
 				}).then(function(data) {
 					$text.text('Success! Loading map data');
 					$btn.removeClass('btn-primary');
@@ -111,7 +110,7 @@ var app = app || Base.extend();
 			getGeoJSON: function() {
 				// move this into the locations processing promise?
 				var me = this;
-				var url = 'http://test.cybercommons.org/mongo/db_find/geologger/coord/';
+				var url = app.get('host') + "/mongo/db_find/geologger/coord/";
 				url += JSON.stringify(this.geoJsonQuery());
 
 				$.getJSON(url).then(function(data) {
