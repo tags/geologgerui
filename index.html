@@ -31,7 +31,7 @@
             <li><a href="index.html">Datasets</a></li>
           </ul>
           <ul class="nav pull-right">
-            <li><a href="http://apps.cybercommons.org/accounts/login/" id="login-link">Login</a></li>
+            <li><a href="http://tags.animalmigration.org/accounts/login/" id="login-link">Login</a></li>
           </ul>
         </div>
       </div>
@@ -81,8 +81,8 @@
               </p>
               <p style="margin-top:40px;">
                 If you would like to upload private datasets, <br>
-                <a href="http://apps.cybercommons.org/accounts/login/">login</a> or
-                <a href="http://apps.cybercommons.org/accounts/login/">create an account</a>
+                <a href="http://tags.animalmigration.org/accounts/login/">login</a> or
+                <a href="http://tags.animalmigration.org/accounts/login/">create an account</a>
                 with Cybercommons.
               </p>
               <div class="footer">
@@ -312,7 +312,7 @@
       // globally define functions so they are accessible from other scripts
 
       var app = app || {};
-      app.host = "http://test.cybercommons.org";
+      app.host = "http://tags.animalmigration.org";
 
       var datasets = undefined;
 
@@ -454,10 +454,10 @@
         // change login/logout label
 
         if (isLoggedIn()) {
-          $('#login-link').attr('href', 'http://apps.cybercommons.org/accounts/logout/');
+          $('#login-link').attr('href', 'http://tags.animalmigration.org/accounts/logout/');
           $('#login-link').text("Logout");
         } else {
-          $('#login-link').attr('href', 'http://apps.cybercommons.org/accounts/login/');
+          $('#login-link').attr('href', 'http://tags.animalmigration.org/accounts/login/');
           $('#login-link').text("Login");
         }
 

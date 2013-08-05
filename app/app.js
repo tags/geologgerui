@@ -11,7 +11,7 @@ var OneQuarterDay = OneDay/4;
 (function() {
 	
 	// app hostname
-	app.set('host', 'http://test.cybercommons.org');
+	app.set('host', 'http://tags.animalmigration.org');
 
 	// default values, some explicitly undefined
 
