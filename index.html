@@ -255,6 +255,10 @@
       </div>
     </div>
 
+    <div id="login-message" title="Please log in">
+      <p>In order to upload files you must first be logged in.</p>
+    </div>
+
     <script tye="text/template" class="upload-success">
 
     </script>
@@ -394,6 +398,11 @@
           return false;
         });
         $('.newdataset-link').click(function() {
+          if (!isLoggedIn()) {
+            $( "#login-message" ).dialog("open");
+            return;
+          }
+
           $('#index').hide();
           $('#newbird').show();
           $('#viewbird').hide();
@@ -460,6 +469,22 @@
           $('#login-link').attr('href', 'http://tags.animalmigration.org/accounts/login/');
           $('#login-link').text("Login");
         }
+
+        // set up the login dialog
+
+        $( "#login-message" ).dialog({
+          modal: true,
+          autoOpen: false,
+          buttons: {
+            Login: function() {
+              $(this).dialog("close");
+              window.location = "http://tags.animalmigration.org/accounts/login/";
+            },
+            Close: function() {
+              $(this).dialog("close");
+            }
+          }
+        });
 
         // and do the deed: load the datasets
 

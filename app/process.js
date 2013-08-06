@@ -110,26 +110,14 @@ var app = app || Base.extend();
 			getGeoJSON: function() {
 				// move this into the locations processing promise?
 				var me = this;
-				var url = app.get('host') + "/mongo/db_find/geologger/coord/";
-				url += JSON.stringify(this.geoJsonQuery());
-
+				var url = app.get('host') + '/geologger/coord/tagname/' + app.get('tagname');
+				
 				$.getJSON(url).then(function(data) {
 	        me.updateCoordinates(data[0].features);
 	        app.map.drawGeoJSON(data[0].features);
 				}, function(error) {
 					log("geojson get failed", error);
 				});
-			},
-
-			geoJsonQuery: function() {
-				return {
-					spec: {
-						"properties.tagname": app.get('tagname'),
-						"properties.user_id": "guest"
-					},
-					sort: [["properties.timestamp",-1]],
-					limit: 1
-				}
 			},
 
 			updateCoordinates: function(features) {
