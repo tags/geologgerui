@@ -4,7 +4,7 @@ DataSetParser.prototype.expressions = function() {
   return [
     {
       name: "TAGS",
-      header: /(datetime,light)/,
+      header: /^(datetime,light)$/,
       hasHeader: true,
       re: /(\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d),(\d+)/,
       parse: function(d) {
@@ -19,10 +19,25 @@ DataSetParser.prototype.expressions = function() {
       re: /\w*,(\d\d\/\d\d\/\d\d \d\d:\d\d:\d\d),\d+.*\d+,(\d+)/,
       parse: function(d) {
         // day/month/2year
-        var day = d.slice(0,2);
-            month = d.slice(3,5);
-            year = "20" + d.slice(6,8);
+        var day = d.slice(0,2),
+            month = d.slice(3,5),
+            year = "20" + d.slice(6,8),
             time = d.slice(9,17);
+        return new Date(year+"-"+month+"-"+day+"T"+time+"Z");
+      },
+      dateIndex: 1,
+      lightIndex: 2
+    },
+    {
+      name: "LUX",
+      header: /^DD\/MM\/YYYY\s*HH:MM:SS\s*light\(lux\)$/,
+      re: /(\d\d\/\d\d\/\d\d\d\d\s*\d\d:\d\d:\d\d)\s*(\d+.*\d+)/,
+      hasHeader: true,
+      parse: function(d) {
+        var day = d.slice(0,2),
+            month = d.slice(3,5),
+            year = d.slice(6,10),
+            time = d.slice(11,19);
         return new Date(year+"-"+month+"-"+day+"T"+time+"Z");
       },
       dateIndex: 1,
