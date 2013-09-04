@@ -12,16 +12,16 @@ def static():
     Work on staging environment
     """
     env.settings = 'production'
-    env.path = '/static/app/%(sitename)s' % env
-    env.hosts = ['static.cybercommons.org']
+    env.path = '/var/www/html/test/%(sitename)s' % env
+    env.hosts = ['tags.animalmigration.org']
 
 def statictest():
     """
     Work on staging environment
     """
     env.settings = 'production'
-    env.path = '/static/apptest/%(sitename)s' % env
-    env.hosts = ['static.cybercommons.org']
+    env.path = '/var/www/html/%(sitename)s' % env
+    env.hosts = ['tags.animalmigration.org  ']
 
 def setup_directories():
     run('mkdir -p %(path)s' % env)
