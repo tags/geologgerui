@@ -91,7 +91,7 @@ var app = app || Base.extend();
 			},
 
 			exportMapCsv: function(dataOut) {
-				dataOut.unshift(['lat', 'lng']);
+				dataOut.unshift(['lng', 'lat']);
 				var csv = this.arrayOfArraysToCSV(dataOut);
 				saveAs(
 		      new Blob([csv], {
