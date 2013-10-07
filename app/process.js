@@ -121,8 +121,16 @@ var app = app || Base.extend();
 			},
 
 			updateCoordinates: function(features) {
+				// bird location includes the lng/lat as well as the datetimes passed
+				// to the r script for processing
 				app.set('birdLocations', _.map(features, function(d) {
-					return d.geometry.coordinates;
+					return [
+						d.geometry.coordinates[0],
+						d.geometry.coordinates[1],
+						d.properties.tFirst,
+						d.properties.tSecond
+					]
+					//return d.geometry.coordinates;
 				}));
 			},
 
