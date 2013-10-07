@@ -7,7 +7,7 @@ import os
 
 env.sitename = os.path.basename(os.getcwd())
 
-def static():
+def statictest():
     """
     Work on staging environment
     """
@@ -15,7 +15,7 @@ def static():
     env.path = '/var/www/html/test/%(sitename)s' % env
     env.hosts = ['tags.animalmigration.org']
 
-def statictest():
+def static():
     """
     Work on staging environment
     """
