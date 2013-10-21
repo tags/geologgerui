@@ -135,11 +135,14 @@ $(function() {
       data: data,
       tagname: get('name'),
       species: get('species'),
-      notes: getNotes() /*,
+      notes: getNotes(),
+
+      // ignore these
       release_location: getLocation('release'),
       release_time: get('release-date'),
       recapture_location: getLocation('capture'),
-      recapture_time: get('capture-date') */
+      recapture_time: get('capture-date')
+      
     };
   }
 
