@@ -192,9 +192,9 @@ var app = app || Base.extend();
 					crossDomain: false 
 				}).then(function(json) {
 		       // set metadata
-				  app.set('releaseLocation',json[0].release_location);
-				  app.set('tagname',json[0].tagname);
-				  app.set('notes',json[0].notes);
+				  if (json[0].release_location) app.set('releaseLocation',json[0].release_location);
+				  if (json[0].tagname) app.set('tagname',json[0].tagname);
+				  if (json[0].notes) app.set('notes',json[0].notes);
 				  
 				  // set the data
 				  me.loadData(json[0].data);
@@ -234,8 +234,15 @@ var app = app || Base.extend();
 			  // data, day before, day after
 			  // drawing deferred to redrawPaths for optimization
 
+			  // downsample the data we're drawing for the context: take every fifth element
+			  var contextData = _.filter(data, function(el, index) {
+			  	return index % 20 == 0;
+			  });
+
+			  console.log("data size", data.length, "context size", contextData.length);
+
 			  context.append("path")
-		      	.datum(data)
+		      	.datum(contextData)
 		      	.attr("class", "line")
 		      	.attr("d", line2);
 
