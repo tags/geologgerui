@@ -33,7 +33,10 @@ $(function() {
       if (!format) {
         console.log("Unable to parse file");
         $('#drop-zone').addClass("file-error");
-        $('#drop-zone .or-drop').text("Unable to parse this file. TAGS and BAS formats are currently supported.");
+        $('#drop-zone .or-drop').html(
+          "<p>Unable to parse this file. TAGS, BAS and LUX formats are currently supported." + 
+          "Please refer to the <a href='http://animalmigration.org/TAGS/help.htm' target='_new'>help files</a> " + 
+          "for more information.</p>");
         return;
       } else {
         console.log("Parsed file format:", format.name);

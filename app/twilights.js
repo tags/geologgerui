@@ -73,6 +73,8 @@ var app = app || Base.extend();
 
 	  function recomputeCalibrationEvents() {
 		 
+	  	// WARNING: this algorithm slows down significantly as the size of the dataset increases
+
 	  	var t = +app.get('threshold').toFixed(1);
 	  	var data = app.get('data');
 	  	var events = [];
@@ -142,7 +144,7 @@ var app = app || Base.extend();
   	}
 
   	function recomputeProblemEvents(events) {
-  		
+
   		// spec: a problem knows which events it encompasses,
   		// and events know which problem they lie within
 
