@@ -31,7 +31,7 @@ DataSetParser.prototype.expressions = function() {
     {
       name: "LUX",
       header: /^DD\/MM\/YYYY\s*HH:MM:SS\s*light\(lux\)$/,
-      re: /(\d\d\/\d\d\/\d\d\d\d\s*\d\d:\d\d:\d\d)\s*(\d+.*\d+)/,
+      re: /(\d\d\/\d\d\/\d\d\d\d\s*\d\d:\d\d:\d\d)\s*(\d+.*\d*)/,
       hasHeader: true,
       parse: function(d) {
         var day = d.slice(0,2),

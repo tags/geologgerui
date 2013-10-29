@@ -29,12 +29,13 @@ $(function() {
      
       var lines = f.target.result.trim().split(/\r?\n|\r/g);
       var format = (new DataSetParser).formatOf(lines[0]);
+      var errors = 0; 
 
       if (!format) {
         console.log("Unable to parse file");
         $('#drop-zone').addClass("file-error");
         $('#drop-zone .or-drop').html(
-          "<p>Unable to parse this file. TAGS, BAS and LUX formats are currently supported." + 
+          "<p>Unable to parse this file. TAGS, BAS and LUX formats are currently supported. " + 
           "Please refer to the <a href='http://animalmigration.org/TAGS/help.htm' target='_new'>help files</a> " + 
           "for more information.</p>");
         return;
@@ -42,12 +43,15 @@ $(function() {
         console.log("Parsed file format:", format.name);
       }
 
-      if (format.hasHeader) lines.shift();
+      if (format.hasHeader) {
+        lines.shift();
+      }
+
       var vals = _.map(lines, function(x) {
         var match = x.match(format.re);
         //console.log(match);
         if (!match) { 
-          // this is an error, which we should keep track of
+          errors++;
           return undefined; 
         } else { 
           return {
@@ -57,7 +61,16 @@ $(function() {
         }
       });
 
-      //console.log(vals);
+      if (errors) {
+        console.log("Encountered errors while parsing file");
+        $('#drop-zone').addClass("file-error");
+        $('#drop-zone .or-drop').html(
+          "<p>The file format was recognized, but errors were encountered while parsing. " + 
+          "Please ensure that each line of the file includes a valid date and time</p>");
+        return;
+      }
+
+      console.log(vals);
 
       var template = _.template($('script.dataset-info-template').html());
       $('#drop-zone .or-drop').html(template({
